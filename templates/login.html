@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle at 20% 20%, #0d1117 0%, #161b22 100%);
+      font-family: "Inter", Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #e6edf3;
+    }
+
+    .login-container {
+      background: #161b22;
+      padding: 2.5rem;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.45);
+      text-align: center;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      color: #f0f6fc;
+      font-size: 1.4rem;
+    }
+
+    .lock-icon {
+      width: 48px;
+      height: 48px;
+      background: #238636;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 1rem auto;
+      animation: pulse 2s infinite;
+    }
+
+    .lock-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: #c9d1d9;
+      text-align: left;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #f0f6fc;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: #58a6ff;
+      box-shadow: 0 0 5px rgba(88, 166, 255, 0.3);
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 1.2rem;
+      background-color: #238636;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.15s;
+    }
+
+    button:hover {
+      background-color: #2ea043;
+      transform: scale(1.02);
+    }
+
+    .error {
+      margin-top: 1rem;
+      color: #ff5555;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #8b949e;
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 1.8rem;
+        border-radius: 12px;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      button, input {
+        font-size: 0.95rem;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(35, 134, 54, 0.6); }
+      50% { box-shadow: 0 0 0 8px rgba(35, 134, 54, 0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="lock-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M17 8V7a5 5 0 00-10 0v1H5v14h14V8h-2zm-8-1a3 3 0 016 0v1H9V7zm8 13H7V10h10v10z"/>
+      </svg>
+    </div>
+    <h2>System Login</h2>
+    <form method="POST">
+      <label for="secret_key">Access Key</label>
+      <input
+        type="password"
+        name="secret_key"
+        id="secret_key"
+        placeholder="Enter your secret key"
+        required
+      />
+      <button type="submit">Login</button>
+      {% if error %}
+      <div class="error">{{ error }}</div>
+      {% endif %}
+    </form>
+    <div class="footer">© 2025 Secure System</div>
+  </div>
+</body>
+</html>
