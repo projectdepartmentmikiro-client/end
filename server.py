@@ -4,16 +4,25 @@ import json, os
 
 app = Flask(__name__)
 
+# ===========================
+# 🗄️ Database Configuration
+# ===========================
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///website_results.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = os.getenv("FLASK_SESSION_SECRET", "temporary_session_secret")
 
+# ===========================
+# 🔑 API Keys
+# ===========================
 UPLOAD_PUBLIC_KEY = os.getenv("UPLOAD_PUBLIC_KEY", "pk_42OXvyElpcR89RtMCMWzNlLH2dPYWAL_")
 UPLOAD_SECRET_KEY = os.getenv("UPLOAD_SECRET_KEY", "sk_gjBya/FZDjrloBK4RbBBZ+BK4zUda9fU5MIrnzdFB8MUXbrIkM73vRzrnvwBH0hc")
 LOGIN_SECRET_KEY = os.getenv("LOGIN_SECRET_KEY", "CDEWS-SECRET-2025")
 
 db = SQLAlchemy(app)
 
+# ===========================
+# 🧩 Database Model
+# ===========================
 class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.String(100))
@@ -24,6 +33,16 @@ class Result(db.Model):
     annotated_image_url = db.Column(db.String(300))
     bounding_boxes = db.Column(db.Text)
 
+# ===========================
+# 🧱 Create tables (fix)
+# ===========================
+with app.app_context():
+    db.create_all()
+    print("✅ Database tables created (if not existing).")
+
+# ===========================
+# 🔐 Login Routes
+# ===========================
 @app.route("/", methods=["GET", "POST"])
 def login():
     if session.get("authenticated"):
@@ -49,13 +68,20 @@ def logout():
     session.pop("authenticated", None)
     return redirect(url_for("login"))
 
+# ===========================
+# 🛰️ API Routes
+# ===========================
 @app.route("/api/upload_results", methods=["POST"])
 def upload_results():
     data = request.get_json() or {}
     client_pk = data.get("api_key")
     client_sk = data.get("api_secret")
+
+    # 🔒 Key verification
     if client_pk != UPLOAD_PUBLIC_KEY or client_sk != UPLOAD_SECRET_KEY:
         return jsonify({"error": "Unauthorized - invalid keys"}), 401
+
+    # 🧾 Save result
     new_result = Result(
         timestamp=data.get("timestamp"),
         device_code=data.get("device_code"),
@@ -67,14 +93,17 @@ def upload_results():
     )
     db.session.add(new_result)
     db.session.commit()
+
     return jsonify({"message": "Data saved successfully"})
 
 @app.route("/api/results", methods=["GET"])
 def get_results():
     client_pk = request.headers.get("X-API-Key")
     client_sk = request.headers.get("X-API-Secret")
+
     if client_pk != UPLOAD_PUBLIC_KEY or client_sk != UPLOAD_SECRET_KEY:
         return jsonify({"error": "Unauthorized"}), 401
+
     results = Result.query.order_by(Result.id.desc()).all()
     return jsonify([
         {
@@ -88,11 +117,18 @@ def get_results():
         for r in results
     ])
 
+# ===========================
+# ⚠️ Error Handling
+# ===========================
 @app.errorhandler(404)
 def not_found(e):
     return redirect(url_for("login"))
 
+# ===========================
+# 🚀 Run App
+# ===========================
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
+        print("✅ Local database ready.")
     app.run(host="0.0.0.0", port=5000)
