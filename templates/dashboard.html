@@ -3,213 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard</title>
+  <title>Egg Detection Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <style>
-    :root {
-      --bg-dark: #0d1117;
-      --bg-card: #161b22;
-      --text-primary: #f0f6fc;
-      --text-secondary: #8b949e;
-      --accent: #238636;
-      --border: #30363d;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      font-family: "Inter", Arial, sans-serif;
-      background: var(--bg-dark);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem;
+      background: #f7f8fa;
+      font-family: "Poppins", sans-serif;
     }
-
-    header {
-      text-align: center;
-      margin-bottom: 2rem;
-      animation: fadeIn 0.8s ease-in-out;
+    .navbar {
+      background: #202a44;
     }
-
-    header h1 {
-      font-size: 1.6rem;
+    .navbar-brand {
+      color: #fff !important;
       font-weight: 600;
-      color: var(--text-primary);
-      letter-spacing: 0.5px;
     }
-
-    .table-container {
-      width: 100%;
-      max-width: 1000px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+    .card {
+      border: none;
       border-radius: 12px;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       overflow: hidden;
-      animation: slideUp 0.8s ease-in-out;
     }
-
-    table {
+    .egg-img {
       width: 100%;
-      border-collapse: collapse;
-      color: var(--text-primary);
-    }
-
-    thead {
-      background: rgba(35, 134, 54, 0.15);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    th, td {
-      padding: 1rem 1.2rem;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th {
-      color: #7ee787;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    td {
-      font-size: 0.95rem;
-      color: var(--text-secondary);
-    }
-
-    tr:hover {
-      background: rgba(56, 139, 253, 0.08);
-      transition: background 0.25s ease;
-    }
-
-    img {
-      width: 90px;
-      height: 60px;
+      height: 220px;
       object-fit: cover;
-      border-radius: 8px;
-      transition: transform 0.25s ease;
     }
-
-    img:hover {
-      transform: scale(1.6);
-      z-index: 2;
-      border: 1px solid var(--accent);
+    .logout-btn {
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
     }
-
-    footer {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      opacity: 0.6;
-    }
-
-    @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-
-      thead {
-        display: none;
-      }
-
-      tr {
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 1rem;
-        padding: 1rem;
-        background: #161b22;
-        border-radius: 10px;
-      }
-
-      td {
-        display: flex;
-        justify-content: space-between;
-        text-align: right;
-        font-size: 0.9rem;
-      }
-
-      td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: #7ee787;
-        text-transform: uppercase;
-        text-align: left;
-      }
-
-      img {
-        width: 100%;
-        max-width: 200px;
-        height: auto;
-        margin-top: 0.5rem;
-      }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
+    .logout-btn:hover {
+      background: #ff1a1a;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>System Dashboard</h1>
-  </header>
 
-  <div class="table-container">
-    <table id="results-table">
-      <thead>
-        <tr>
-          <th>Timestamp</th>
-          <th>Device</th>
-          <th>Count</th>
-          <th>Image</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <nav class="navbar px-4 py-3">
+    <span class="navbar-brand">🥚 MIKIRO Egg Detection Dashboard</span>
+    <a href="/logout" class="logout-btn">Logout</a>
+  </nav>
+
+  <div class="container mt-4">
+    {% if results|length == 0 %}
+      <div class="alert alert-warning text-center">
+        🚫 No egg detection results yet. <br>
+        Upload from your Colab or device to see them appear here.
+      </div>
+    {% else %}
+      <div class="row g-4">
+        {% for result in results %}
+          <div class="col-md-4">
+            <div class="card">
+              <img src="{{ result.annotated_image_url }}" class="egg-img" alt="Detected Eggs">
+              <div class="card-body">
+                <h5 class="card-title text-primary">Device: {{ result.device_code }}</h5>
+                <p><strong>Egg Count:</strong> {{ result.egg_count }}</p>
+                <p><strong>Captured:</strong> {{ result.timestamp }}</p>
+                <a href="{{ result.image_url }}" target="_blank" class="btn btn-outline-secondary btn-sm">View Original</a>
+                <a href="{{ result.binary_image_url }}" target="_blank" class="btn btn-outline-secondary btn-sm">View Binary</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
   </div>
 
-  <footer>Secure Access Panel</footer>
-
-  <script>
-    async function loadData() {
-      try {
-        const res = await fetch('/api/results');
-        const data = await res.json();
-        const tbody = document.querySelector('#results-table tbody');
-        tbody.innerHTML = '';
-
-        data.reverse().forEach(item => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td data-label="Timestamp">${item.timestamp}</td>
-            <td data-label="Device">${item.device_code}</td>
-            <td data-label="Count">${item.egg_count}</td>
-            <td data-label="Image">
-              <img src="${item.annotated_image_url}" alt="Annotated Image">
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-      } catch (err) {
-        console.error('Error loading data:', err);
-      }
-    }
-
-    loadData();
-    setInterval(loadData, 10000); // refresh every 10s
-  </script>
 </body>
 </html>
