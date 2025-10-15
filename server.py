@@ -73,28 +73,36 @@ def logout():
 # ===========================
 @app.route("/api/upload_results", methods=["POST"])
 def upload_results():
-    data = request.get_json() or {}
+    try:
+        data = request.get_json(force=True)
+    except Exception:
+        return jsonify({"error": "Invalid JSON payload"}), 400
+
     client_pk = data.get("api_key")
     client_sk = data.get("api_secret")
 
-    # 🔒 Key verification
+    # 🔒 Validate API keys
     if client_pk != UPLOAD_PUBLIC_KEY or client_sk != UPLOAD_SECRET_KEY:
         return jsonify({"error": "Unauthorized - invalid keys"}), 401
 
-    # 🧾 Save result
-    new_result = Result(
-        timestamp=data.get("timestamp"),
-        device_code=data.get("device_code"),
-        egg_count=data.get("egg_count"),
-        image_url=data.get("image_url"),
-        binary_image_url=data.get("binary_image_url"),
-        annotated_image_url=data.get("annotated_image_url"),
-        bounding_boxes=json.dumps(data.get("bounding_boxes")),
-    )
-    db.session.add(new_result)
-    db.session.commit()
+    # 🧾 Create new record
+    try:
+        new_result = Result(
+            timestamp=data.get("timestamp"),
+            device_code=data.get("device_code"),
+            egg_count=int(data.get("egg_count", 0)),
+            image_url=data.get("image_url"),
+            binary_image_url=data.get("binary_image_url"),
+            annotated_image_url=data.get("annotated_image_url"),
+            bounding_boxes=json.dumps(data.get("bounding_boxes", []))
+        )
+        db.session.add(new_result)
+        db.session.commit()
+        return jsonify({"message": "Data saved successfully"}), 200
 
-    return jsonify({"message": "Data saved successfully"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
 
 @app.route("/api/results", methods=["GET"])
 def get_results():
@@ -116,6 +124,13 @@ def get_results():
         }
         for r in results
     ])
+
+# ===========================
+# 🔍 Health Check
+# ===========================
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok"}), 200
 
 # ===========================
 # ⚠️ Error Handling
