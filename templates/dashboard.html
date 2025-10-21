@@ -44,14 +44,14 @@
 <body>
 
   <nav class="navbar px-4 py-3">
-    <span class="navbar-brand">🥚 MIKIRO Egg Detection Dashboard</span>
+    <span class="navbar-brand">MIKIRO Egg Detection Dashboard</span>
     <a href="/logout" class="logout-btn">Logout</a>
   </nav>
 
   <div class="container mt-4">
     {% if results|length == 0 %}
       <div class="alert alert-warning text-center">
-        🚫 No egg detection results yet. <br>
+        No egg detection results yet.<br>
         Upload from your Colab or device to see them appear here.
       </div>
     {% else %}
@@ -59,13 +59,31 @@
         {% for result in results %}
           <div class="col-md-4">
             <div class="card">
-              <img src="{{ result.annotated_image_url }}" class="egg-img" alt="Detected Eggs">
+              <div id="carousel-{{ result.id }}" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                  <div class="carousel-item active">
+                    <img src="{{ url_for('uploaded_file', filename=result.image_url) }}" class="egg-img d-block w-100" alt="Original Image">
+                  </div>
+                  <div class="carousel-item">
+                    <img src="{{ url_for('uploaded_file', filename=result.binary_image_url) }}" class="egg-img d-block w-100" alt="Binary Image">
+                  </div>
+                  <div class="carousel-item">
+                    <img src="{{ url_for('uploaded_file', filename=result.annotated_image_url) }}" class="egg-img d-block w-100" alt="Annotated Image">
+                  </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ result.id }}" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ result.id }}" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
               <div class="card-body">
                 <h5 class="card-title text-primary">Device: {{ result.device_code }}</h5>
                 <p><strong>Egg Count:</strong> {{ result.egg_count }}</p>
                 <p><strong>Captured:</strong> {{ result.timestamp }}</p>
-                <a href="{{ result.image_url }}" target="_blank" class="btn btn-outline-secondary btn-sm">View Original</a>
-                <a href="{{ result.binary_image_url }}" target="_blank" class="btn btn-outline-secondary btn-sm">View Binary</a>
               </div>
             </div>
           </div>
@@ -74,5 +92,6 @@
     {% endif %}
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
