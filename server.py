@@ -8,7 +8,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///website_results.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = os.getenv("FLASK_SESSION_SECRET", "temporary_session_secret")
 
-UPLOAD_FOLDER = "uploads"
+# Use Render persistent disk if available
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")  # fallback to local uploads folder
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
